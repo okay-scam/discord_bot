@@ -1,6 +1,7 @@
 import discord
 import asyncio
-from cogs.checks import allowed_channels
+#from cogs.checks import allowed_channels
+import bot
 from discord.ext import commands
 
 class ErrorHandler():
@@ -11,9 +12,10 @@ class ErrorHandler():
         # (Global, likely) Check Faliure
         if isinstance(error, discord.ext.commands.errors.CheckFailure):      
             # Build allowed_channels_objs list
+            # TODO: could do this with a list comprehension
             allowed_channels_mention_objs = []
             allowed_channels_objs = []
-            for channel in allowed_channels:
+            for channel in bot.allowed_channels:
                 allowed_channels_mention_objs.append(self.bot.get_channel(channel).mention)
                 allowed_channels_objs.append(self.bot.get_channel(channel))
 

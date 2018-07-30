@@ -2,7 +2,7 @@ import discord
 import asyncio
 import json
 from discord.ext import commands
-from cogs.checks import Checks
+from cogs import checks
 
 client = discord.Client()
 bot = commands.Bot(command_prefix='!')
@@ -16,6 +16,11 @@ startup_extensions = [
     "cogs.error_handler",
     "cogs.exile"
 ]
+allowed_channels = [
+    "414701519733260288", #botspam
+    "471262806533079041"  #bots
+]
+
 
 @bot.event
 async def on_ready():
@@ -23,7 +28,7 @@ async def on_ready():
 
 @bot.check
 def is_allowed_channel(ctx):
-    return Checks.is_allowed_channel_check(ctx)
+    return checks.Checks.is_allowed_channel_check(ctx)
 
 @bot.command()
 async def load(extension_name):
@@ -64,8 +69,8 @@ if __name__ == "__main__":
             exc = '{}: {}'.format(type(e).__name__, e)
             print('Failed to load extension {}\n{}'.format(extension, exc))
 
-# Get Token
-with open('config.json') as json_config:
-    config = json.load(json_config)
+    # Get Token
+    with open('config.json') as json_config:
+        config = json.load(json_config)
 
-bot.run(config['token'])
+    bot.run(config['token'])
