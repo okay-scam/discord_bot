@@ -23,6 +23,8 @@ class ErrorHandler():
             await asyncio.sleep(0.1)
             for channel in allowed_channels_objs:
                 await self.bot.send_message(channel, 'Sorry {}, commands only work in these channels: {}'.format(ctx.message.author.mention, ' '.join(allowed_channels_mention_objs)))
+        else:
+            print(error)
 
 def setup(bot):
     bot.add_cog(ErrorHandler(bot))
