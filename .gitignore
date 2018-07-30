@@ -1,6 +1,6 @@
 # Custom
 config.json
-sounds/
+sounds/*
 
 #### GitHub Generated .gitignore data
 # Byte-compiled / optimized / DLL files
