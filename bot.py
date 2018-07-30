@@ -13,7 +13,7 @@ startup_extensions = [
     "cogs.mute_roulette",
     "cogs.checks",
     "cogs.voice2",
- #   "cogs.error_handler",
+    "cogs.error_handler",
     "cogs.exile"
 ]
 
