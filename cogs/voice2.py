@@ -1,5 +1,6 @@
 import asyncio
 import discord
+import youtube_dl
 from discord.ext import commands
 from pathlib import Path
 
@@ -255,7 +256,20 @@ class Music:
 
             while not player.is_done():
                 await asyncio.sleep(1)
-            await ctx.invoke(self.stop)  
+            await ctx.invoke(self.stop) 
+
+    @commands.command(pass_context=True, no_pm=True)
+    async def url(self, ctx, url):
+        state = self.get_voice_state(ctx.message.server)
+        
+        if state.voice is None:
+            success = await ctx.invoke(self.summon)
+            if not success:
+                return
+        
+        player = await state.voice.create_ytdl_player(url)
+        player.start()
+        
 
 def setup(bot):
     bot.add_cog(Music(bot))
