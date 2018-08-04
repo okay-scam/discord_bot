@@ -269,7 +269,26 @@ class Music:
         conn = S3Connection(bot.config['AWS_ACCESS_KEY_ID'], bot.config['AWS_SECRET_ACCESS_KEY'])
         bucket = conn.get_bucket(bot.config['AWS_STORAGE_BUCKET_NAME'])
 
-        await self.bot.say('{0}{1}{0}'.format('```',' '.join(str(key.name.split('.mp3')[0]) for key in bucket.list())))
+        sounds_list = []
+        sounds_list_string = []
+
+        for key in bucket.list():
+            sounds_list.append(str(key.name.split('.mp3')[0]))
+        
+        longest_filename = max(sounds_list, key=len)
+        for index, item in enumerate(sounds_list, 1):
+            blank_spaces = ' ' * (len(longest_filename) - len(item))
+
+            # Every 4th
+            if index % 4 == 0 and not index == 1:
+                sounds_list_string.append('{}{}{}'.format(item, blank_spaces, '\n'))
+            else:
+            # Every other item, except the 5th
+                sounds_list_string.append('{}{}{}'.format(item, blank_spaces, '\t'))
+               
+        list_message = ''.join(sounds_list_string)
+        
+        await self.bot.say('{0}{1}{0}'.format('```', list_message))
 
     @commands.command(pass_context=True, no_pm=True)
     async def sound(self, ctx, url):
