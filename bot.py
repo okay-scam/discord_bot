@@ -9,12 +9,12 @@ bot = commands.Bot(command_prefix='!')
 
 # this specifies what extensions to load when the bot starts up
 startup_extensions = [
-    "cogs.mute",
+    #"cogs.mute",
     "cogs.mute_roulette",
     "cogs.checks",
-    "cogs.voice2",
+    "cogs.voice",
     "cogs.error_handler",
-    "cogs.exile"
+    #"cogs.exile"
 ]
 allowed_channels = [
     "414701519733260288", #botspam
