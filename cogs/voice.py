@@ -1,8 +1,12 @@
 import asyncio
 import discord
 import youtube_dl
+import requests
+import bot
+from boto.s3.connection import S3Connection
 from discord.ext import commands
 from pathlib import Path
+from pprint import pprint
 
 if not discord.opus.is_loaded():
     # the 'opus' library here is opus.dll on windows
@@ -200,6 +204,7 @@ class Music:
         except:
             pass
 
+
     @commands.command(pass_context=True, no_pm=True)
     async def skip(self, ctx):
         """Vote to skip a song. The song requester can automatically skip.
@@ -238,8 +243,9 @@ class Music:
             skip_count = len(state.skip_votes)
             await self.bot.say('Now playing {} [skips: {}/3]'.format(state.current, skip_count))
 
+    # Local sounds
     @commands.command(pass_context=True, no_pm=True)
-    async def sound(self, ctx, sound):
+    async def local_sound(self, ctx, sound):
         state = self.get_voice_state(ctx.message.server)
         sound_file = 'sounds/{}.mp3'.format(sound)
 
@@ -255,25 +261,45 @@ class Music:
             player.start()
 
             while not player.is_done():
-                await asyncio.sleep(1)
+                pass
             await ctx.invoke(self.stop) 
 
     @commands.command(pass_context=True, no_pm=True)
-    async def url(self, ctx, url):
-        state = self.get_voice_state(ctx.message.server)
-        ec2url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/'
+    async def list(self, ctx):
+        conn = S3Connection(bot.config['AWS_ACCESS_KEY_ID'], bot.config['AWS_SECRET_ACCESS_KEY'])
+        bucket = conn.get_bucket(bot.config['AWS_STORAGE_BUCKET_NAME'])
 
+        await self.bot.say('{0}{1}{0}'.format('```',' '.join(str(key.name.split('.mp3')[0]) for key in bucket.list())))
+
+    @commands.command(pass_context=True, no_pm=True)
+    async def sound(self, ctx, url):
+        state = self.get_voice_state(ctx.message.server)
+        ec2_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/'
+        mp3_url = '{}{}.mp3'.format(ec2_url, url)
+        r = requests.head(mp3_url)
+
+        # Check if sound exists
+        if not r.status_code == 200:
+            await self.bot.say('Can\'t find *{}.mp3*'.format(url))
+            return
+
+        print(r.status_code)
+        # Summon to channel
         if state.voice is None:
             success = await ctx.invoke(self.summon)
             if not success:
                 return
-        
-        if state.is_playing():
-            state.stop()
-            await asyncio.sleep(0.5)
-        player = await state.voice.create_ytdl_player('{}{}.mp3'.format(ec2url, url))
-        player.start()
-        
+
+            try:
+                player = await state.voice.create_ytdl_player(mp3_url)
+                player.start()
+                while player.is_playing():
+                    pass
+                await ctx.invoke(self.stop)    
+            except discord.ClientException as e:
+                print(e)
+                await ctx.invoke(self.stop)      
+
 
 def setup(bot):
     bot.add_cog(Music(bot))

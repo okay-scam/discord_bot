@@ -1,7 +1,7 @@
 # Custom
 config.json
 sounds/*
-
+move2aws.sh
 #### GitHub Generated .gitignore data
 # Byte-compiled / optimized / DLL files
 __pycache__/

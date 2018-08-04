@@ -7,6 +7,10 @@ from cogs import checks
 client = discord.Client()
 bot = commands.Bot(command_prefix='!')
 
+# Get Config
+with open('config.json') as json_config:
+    config = json.load(json_config)
+
 # this specifies what extensions to load when the bot starts up
 startup_extensions = [
     #"cogs.mute",
@@ -14,7 +18,7 @@ startup_extensions = [
     "cogs.checks",
     "cogs.voice",
     "cogs.error_handler",
-    #"cogs.exile"
+    #"cogs.exile",
 ]
 allowed_channels = [
     "414701519733260288", #botspam
@@ -68,9 +72,5 @@ if __name__ == "__main__":
         except Exception as e:
             exc = '{}: {}'.format(type(e).__name__, e)
             print('Failed to load extension {}\n{}'.format(extension, exc))
-
-    # Get Token
-    with open('config.json') as json_config:
-        config = json.load(json_config)
 
     bot.run(config['token'])
