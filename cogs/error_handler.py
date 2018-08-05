@@ -12,7 +12,6 @@ class ErrorHandler():
         # (Global, likely) Check Faliure
         if isinstance(error, discord.ext.commands.errors.CheckFailure):      
             # Build allowed_channels_objs list
-            # TODO: could do this with a list comprehension
             allowed_channels_mention_objs = []
             allowed_channels_objs = []
             for channel in bot.allowed_channels:

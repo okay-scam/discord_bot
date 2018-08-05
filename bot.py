@@ -18,11 +18,12 @@ startup_extensions = [
     "cogs.checks",
     "cogs.voice",
     "cogs.error_handler",
-    #"cogs.exile",
+    "cogs.exile",
+    "cogs.votes",
 ]
 allowed_channels = [
     "414701519733260288", #botspam
-    "471262806533079041"  #bots
+    "471262806533079041"  #bot
 ]
 
 
