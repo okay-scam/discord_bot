@@ -302,13 +302,11 @@ class Music:
             await self.bot.say('Can\'t find *{}.mp3*'.format(url))
             return
 
-        print(r.status_code)
         # Summon to channel
         if state.voice is None:
             success = await ctx.invoke(self.summon)
             if not success:
                 return
-
             try:
                 player = await state.voice.create_ytdl_player(mp3_url)
                 player.start()
@@ -317,8 +315,32 @@ class Music:
                 await ctx.invoke(self.stop)    
             except discord.ClientException as e:
                 print(e)
-                await ctx.invoke(self.stop)      
+                await ctx.invoke(self.stop)
 
+    async def on_voice_state_update(self, before, after):
+        # Detect voice channel state change
+        if before.voice_channel != after.voice_channel:
+            if after.id == '113460067017179136': # Scam
+                mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/mlg.mp3'
+            elif after.id == '163228028845948928': # Will
+                mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/inception.mp3'
+            else:
+                return
+            
+            server = after.server
+            voice_channel = after.voice_channel
+
+            voice = await self.bot.join_voice_channel(voice_channel)
+
+            try:
+                player = await voice.create_ytdl_player(mp3_url)
+                player.start()
+                while player.is_playing():
+                    pass
+                await voice.disconnect()
+            except Exception as e:
+                await voice.disconnect()
+            
 
 def setup(bot):
     bot.add_cog(Music(bot))
