@@ -17,8 +17,8 @@ startup_extensions = [
     "cogs.mute_roulette",
     "cogs.checks",
     "cogs.voice",
-    "cogs.error_handler",
-    "cogs.exile",
+    #"cogs.error_handler",
+    #"cogs.exile",
     "cogs.votes",
 ]
 allowed_channels = [
