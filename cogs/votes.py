@@ -103,6 +103,10 @@ class Votes():
             await self.bot.delete_message(self.vote)
             self.embed = discord.Embed(colour=discord.Colour(0xff0000))
             self.embed.description = '❌ Not enough votes, vote failed.'
+        elif result == 'force_end':
+            await self.bot.delete_message(self.vote)
+            self.embed = discord.Embed(colour=discord.Colour(0xff0000))
+            self.embed.description = 'Vote cancelled.'
         else:
             await self.bot.send_message(self.vote.channel, "```Something went wrong... maybe try again?```")
             return
@@ -118,6 +122,7 @@ class Votes():
                     voice_act_roles = await self.get_voice_act_roles(user_permissions)
                     voice_act_role_objs = await self.get_roles(voice_act_roles)
                     await self.bot.remove_roles(self.mentioned_user, *voice_act_role_objs)
+        return
 
     async def get_roles(self, target_names):
         # Pass me a list of role names and I'll return their role objects as a list
@@ -160,6 +165,13 @@ class Votes():
         # Get mentioned user
         self.mentioned_user = user
         await self.vote_start(ctx, self.vote_type)
+
+    @commands.command()
+    @commands.has_role('CEO')
+    async def vend(self):
+        if self.vote_in_progress:
+            await self.vote_end('force_end')
+        return
 
     @commands.command(pass_context=True)
     async def vptt(self, ctx, user: discord.User):
