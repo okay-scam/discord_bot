@@ -319,11 +319,13 @@ class Music:
 
     async def on_voice_state_update(self, before, after):
         # Detect voice channel state change
-        if before.voice_channel != after.voice_channel:
+        if before.voice_channel != after.voice_channel and after.voice_channel is not None and after.voice_channel is not after.server.afk_channel:
             if after.id == '113460067017179136': # Scam
                 mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/mlg.mp3'
             elif after.id == '163228028845948928': # Will
                 mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/inception.mp3'
+            elif after.id == '298639698694373377': # Crambo
+                mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/smokeweed.mp3'            
             else:
                 return
             
