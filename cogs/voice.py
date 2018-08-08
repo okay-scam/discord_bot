@@ -3,6 +3,7 @@ import discord
 import youtube_dl
 import requests
 import bot
+from tabulate import tabulate
 from boto.s3.connection import S3Connection
 from discord.ext import commands
 from pathlib import Path
@@ -274,7 +275,10 @@ class Music:
 
         for key in bucket.list():
             sounds_list.append(str(key.name.split('.mp3')[0]))
-        
+
+        list_message = tabulate([sounds_list[i:i + 4] for i in range(0, len(sounds_list), 4)], tablefmt='plain')
+
+        '''
         longest_filename = max(sounds_list, key=len)
         for index, item in enumerate(sounds_list, 1):
             blank_spaces = ' ' * (len(longest_filename) - len(item))
@@ -287,6 +291,7 @@ class Music:
                 sounds_list_string.append('{}{}{}'.format(item, blank_spaces, '\t'))
                
         list_message = ''.join(sounds_list_string)
+        '''
         
         await self.bot.say('{0}{1}{0}'.format('```', list_message))
 
