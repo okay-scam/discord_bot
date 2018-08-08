@@ -2,6 +2,7 @@
 config.json
 sounds/*
 move2aws.sh
+sqlite3/*
 #### GitHub Generated .gitignore data
 # Byte-compiled / optimized / DLL files
 __pycache__/

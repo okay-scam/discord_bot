@@ -1,6 +1,7 @@
 import discord
 import asyncio
 import json
+import dataset
 from discord.ext import commands
 from cogs import checks
 
@@ -10,6 +11,9 @@ bot = commands.Bot(command_prefix='!')
 # Get Config
 with open('config.json') as json_config:
     config = json.load(json_config)
+
+# Initialise database connection
+db = dataset.connect('sqlite:///sqlite3/discord.db')
 
 # this specifies what extensions to load when the bot starts up
 startup_extensions = [

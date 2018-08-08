@@ -3,6 +3,7 @@ import discord
 import youtube_dl
 import requests
 import bot
+import dataset
 from tabulate import tabulate
 from boto.s3.connection import S3Connection
 from discord.ext import commands
@@ -277,21 +278,6 @@ class Music:
             sounds_list.append(str(key.name.split('.mp3')[0]))
 
         list_message = tabulate([sounds_list[i:i + 4] for i in range(0, len(sounds_list), 4)], tablefmt='plain')
-
-        '''
-        longest_filename = max(sounds_list, key=len)
-        for index, item in enumerate(sounds_list, 1):
-            blank_spaces = ' ' * (len(longest_filename) - len(item))
-
-            # Every 4th
-            if index % 4 == 0 and not index == 1:
-                sounds_list_string.append('{}{}{}'.format(item, blank_spaces, '\n'))
-            else:
-            # Every other item, except the 5th
-                sounds_list_string.append('{}{}{}'.format(item, blank_spaces, '\t'))
-               
-        list_message = ''.join(sounds_list_string)
-        '''
         
         await self.bot.say('{0}{1}{0}'.format('```', list_message))
 
@@ -304,7 +290,7 @@ class Music:
 
         # Check if sound exists
         if not r.status_code == 200:
-            await self.bot.say('Can\'t find *{}.mp3*'.format(url))
+            await self.bot.say('```Can\'t find *{}.mp3*```'.format(url))
             return
 
         # Summon to channel
@@ -322,15 +308,55 @@ class Music:
                 print(e)
                 await ctx.invoke(self.stop)
 
+    @commands.command(pass_context=True, no_pm=True)
+    async def joinsound(self, ctx, join_sound=None):
+        table = bot.db['users']
+        db_user = table.find_one(user_id=ctx.message.author.id)
+        user = '{}#{}'.format(ctx.message.author.name, ctx.message.author.discriminator)
+
+        if join_sound == 'remove':
+            try:
+                table.upsert(dict(user_id=ctx.message.author.id, user=user, join_sound=''), ['user_id'])
+                await self.bot.say('```Your join sound has been removed```')
+                return
+            finally:
+                pass
+
+        # Command passed without args
+        if join_sound is None:
+            if db_user['join_sound'] is None or db_user['join_sound'] == '':
+                await self.bot.say('```You don\'t have a join sound, idiot.```')            
+            else:
+                await self.bot.say('```Your current join sound is {}```'.format(db_user['join_sound']))
+            return
+
+        # Check the mp3 exists
+        ec2_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/'
+        mp3_url = '{}{}.mp3'.format(ec2_url, join_sound)
+        r = requests.head(mp3_url)
+
+        if not r.status_code == 200:
+            await self.bot.say('```Can\'t find *{}.mp3*```'.format(join_sound))
+            return   
+
+        try:
+            table.upsert(dict(user_id=ctx.message.author.id, user=user, join_sound=join_sound), ['user_id'])
+            await self.bot.say('```Your join sound has been set to {}```'.format(join_sound))
+        except Exception as e:
+            await self.bot.say(e)
+
+
     async def on_voice_state_update(self, before, after):
         # Detect voice channel state change
         if before.voice_channel != after.voice_channel and after.voice_channel is not None and after.voice_channel is not after.server.afk_channel:
-            if after.id == '113460067017179136': # Scam
-                mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/mlg.mp3'
-            elif after.id == '163228028845948928': # Will
-                mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/inception.mp3'
-            elif after.id == '298639698694373377': # Crambo
-                mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/smokeweed.mp3'            
+            table = bot.db['users']
+            db_user = table.find_one(user_id=after.id)
+
+            if db_user['join_sound'] == '':
+                return
+
+            if db_user['join_sound'] is not None:
+                mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/{}.mp3'.format(db_user['join_sound'])
             else:
                 return
             
@@ -347,7 +373,7 @@ class Music:
                 await voice.disconnect()
             except Exception as e:
                 await voice.disconnect()
-            
+
 
 def setup(bot):
     bot.add_cog(Music(bot))

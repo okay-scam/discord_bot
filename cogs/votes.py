@@ -1,6 +1,7 @@
 import discord
 import asyncio
 import math
+import bot
 from pprint import pprint
 from collections import Counter
 from discord.ext import commands
@@ -223,6 +224,7 @@ class Votes():
 
         await self.update_voter_ids()
         await asyncio.sleep(1)
+
 
 def setup(bot):
     bot.add_cog(Votes(bot))
