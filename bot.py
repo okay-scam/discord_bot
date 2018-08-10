@@ -9,11 +9,11 @@ client = discord.Client()
 bot = commands.Bot(command_prefix='!')
 
 # Get Config
-with open('config.json') as json_config:
+with open('/home/ubuntu/discord_bot/config.json') as json_config:
     config = json.load(json_config)
 
 # Initialise database connection
-db = dataset.connect('sqlite:///sqlite3/discord.db')
+db = dataset.connect('sqlite:///home/ubuntu/discord_bot/sqlite3/discord.db')
 
 # this specifies what extensions to load when the bot starts up
 startup_extensions = [

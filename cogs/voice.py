@@ -352,6 +352,10 @@ class Music:
             table = bot.db['users']
             db_user = table.find_one(user_id=after.id)
 
+            if len(after.voice_channel.voice_members) < 2:
+                print(len(after.voice_channel.voice_members))
+            return
+
             if db_user['join_sound'] == '':
                 return
 
