@@ -275,8 +275,9 @@ class Music:
         sounds_list_string = []
 
         for key in bucket.list():
-            sounds_list.append(str(key.name.split('.mp3')[0]))
+            sounds_list.append(str(key.name.split('.mp3')[0]).lower())
 
+        sounds_list.sort()
         list_message = tabulate([sounds_list[i:i + 4] for i in range(0, len(sounds_list), 4)], tablefmt='plain')
         
         await self.bot.say('{0}{1}{0}'.format('```', list_message))
