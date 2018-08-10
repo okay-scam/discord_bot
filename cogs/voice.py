@@ -279,7 +279,7 @@ class Music:
 
         sounds_list.sort()
         list_message = tabulate([sounds_list[i:i + 4] for i in range(0, len(sounds_list), 4)], tablefmt='plain')
-        
+
         await self.bot.say('{0}{1}{0}'.format('```', list_message))
 
     @commands.command(pass_context=True, no_pm=True)
@@ -310,25 +310,39 @@ class Music:
                 await ctx.invoke(self.stop)
 
     @commands.command(pass_context=True, no_pm=True)
-    async def joinsound(self, ctx, join_sound=None):
+    async def joinsound(self, ctx, join_sound=None, user_mentioned: discord.User=None):
         table = bot.db['users']
-        db_user = table.find_one(user_id=ctx.message.author.id)
-        user = '{}#{}'.format(ctx.message.author.name, ctx.message.author.discriminator)
 
-        if join_sound == 'remove':
+        # Check if user was mentioned
+        if user_mentioned:
+            db_user = table.find_one(user_id=user_mentioned.id)
+        else:
+            # Find user, if fail assign ''
             try:
-                table.upsert(dict(user_id=ctx.message.author.id, user=user, join_sound=''), ['user_id'])
-                await self.bot.say('```Your join sound has been removed```')
-                return
-            finally:
-                pass
+                db_user = table.find_one(user_id=ctx.message.author.id)
+            except Exception as e:
+                db_user = None
+
+        if user_mentioned is not None:
+            user = '{}#{}'.format(user_mentioned.name, user_mentioned.discriminator)            
+        else:
+            user = '{}#{}'.format(ctx.message.author.name, ctx.message.author.discriminator)
 
         # Command passed without args
         if join_sound is None:
-            if db_user['join_sound'] is None or db_user['join_sound'] == '':
+            if db_user is None:
                 await self.bot.say('```You don\'t have a join sound, idiot.```')            
             else:
                 await self.bot.say('```Your current join sound is {}```'.format(db_user['join_sound']))
+            return
+
+        # If no argument is passed, send the user their current join sound
+        if join_sound == 'remove':
+            try:
+                table.delete(user_id=ctx.message.author.id)
+            except Exception as e:
+                await self.bot.say('Something went wrong...')
+            await self.bot.say('```Your join sound has been removed```')
             return
 
         # Check the mp3 exists
@@ -340,27 +354,29 @@ class Music:
             await self.bot.say('```Can\'t find *{}.mp3*```'.format(join_sound))
             return   
 
-        try:
+        if user_mentioned is not None:
+            table.upsert(dict(user_id=user_mentioned.id, user=user, join_sound=join_sound), ['user_id'])
+            await self.bot.say('```{}\'s join sound has been set to {}```'.format(user_mentioned.name,join_sound))        
+        else:
             table.upsert(dict(user_id=ctx.message.author.id, user=user, join_sound=join_sound), ['user_id'])
             await self.bot.say('```Your join sound has been set to {}```'.format(join_sound))
-        except Exception as e:
-            await self.bot.say(e)
+
 
 
     async def on_voice_state_update(self, before, after):
         # Detect voice channel state change
         if before.voice_channel != after.voice_channel and after.voice_channel is not None and after.voice_channel is not after.server.afk_channel:
+            # Find user, if fail assign ''
             table = bot.db['users']
-            db_user = table.find_one(user_id=after.id)
+            try:
+                db_user = table.find_one(user_id=after.id)
+            except Exception as e:
+                db_user = None
 
-            if len(after.voice_channel.voice_members) < 2:
-                print(len(after.voice_channel.voice_members))
-            return
-
-            if db_user['join_sound'] == '':
+            if db_user is None:
                 return
 
-            if db_user['join_sound'] is not None:
+            if db_user is not None:
                 mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/{}.mp3'.format(db_user['join_sound'])
             else:
                 return
