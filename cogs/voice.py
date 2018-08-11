@@ -362,10 +362,9 @@ class Music:
             await self.bot.say('```Your join sound has been set to {}```'.format(join_sound))
 
 
-
     async def on_voice_state_update(self, before, after):
         # Detect voice channel state change
-        if before.voice_channel != after.voice_channel and after.voice_channel is not None and after.voice_channel is not after.server.afk_channel:
+        if before.voice_channel != after.voice_channel and after.voice_channel is not None and after.voice_channel is not after.server.afk_channel and len(after.voice_channel.voice_members) > 1:
             # Find user, if fail assign ''
             table = bot.db['users']
             try:
