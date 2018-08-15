@@ -364,26 +364,23 @@ class Music:
 
     async def on_voice_state_update(self, before, after):
         # Detect voice channel state change
-        if before.voice_channel != after.voice_channel and after.voice_channel is not None and after.voice_channel is not after.server.afk_channel and len(after.voice_channel.voice_members) > 1:
+        if (before.voice_channel != after.voice_channel
+            and after.voice_channel is not None 
+            and after.voice_channel is not after.server.afk_channel
+            and after.id != '471255864238538753'
+            and len(after.voice_channel.voice_members) > 1):
+
             # Find user, if fail assign ''
-            table = bot.db['users']
             try:
-                db_user = table.find_one(user_id=after.id)
+                db_user = bot.db['users'].find_one(user_id=after.id)
             except Exception as e:
-                db_user = None
-
-            if db_user is None:
+                print(e)
                 return
 
-            if db_user is not None:
-                mp3_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/{}.mp3'.format(db_user['join_sound'])
-            else:
-                return
+            mp3_url = ('https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/'
+            '{}.mp3'.format((db_user['join_sound'])))
             
-            server = after.server
-            voice_channel = after.voice_channel
-
-            voice = await self.bot.join_voice_channel(voice_channel)
+            voice = await self.bot.join_voice_channel(after.voice_channel)
 
             try:
                 player = await voice.create_ytdl_player(mp3_url)
