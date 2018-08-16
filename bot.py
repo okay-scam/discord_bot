@@ -24,6 +24,7 @@ startup_extensions = [
     "cogs.error_handler",
     #"cogs.exile",
     "cogs.votes",
+    "cogs.time",
 ]
 allowed_channels = [
     "414701519733260288", #botspam
