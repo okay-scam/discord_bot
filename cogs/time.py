@@ -52,7 +52,7 @@ class TimeCog():
                     delta = time_table.find_one(id=row['id'])
                     session_time = delta['leave_timestamp'] - delta['join_timestamp']
                     await self.bot.send_message(self.bot.get_channel('471262806533079041'), 
-                        '{} session time: {} minute(s), {} second(s)'.format(after.name, round(session_time.seconds/60), session_time.seconds))
+                        '{} session time: {} minute(s), {} second(s)'.format(after.name, round(session_time.seconds/60), session_time.seconds % 60))
 
 
 def setup(bot):
