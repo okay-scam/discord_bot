@@ -71,7 +71,7 @@ class TimeCog():
  
         highscores = sorted(highscores.items(), key=operator.itemgetter(1), reverse=True)
         await self.bot.say('```{}```'.format(
-            tabulate(highscores[:10], tablefmt='plain', showindex='always')))
+            tabulate(highscores[:10], tablefmt='plain', showindex=range(1,11))))
 
 
 
