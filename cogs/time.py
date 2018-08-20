@@ -1,8 +1,12 @@
 import discord
 import asyncio
 import datetime
+import operator
+from tabulate import tabulate
 import bot
 from pprint import pprint
+from collections import defaultdict
+from discord.ext import commands
 
 class TimeCog():
     def __init__(self, bot):
@@ -53,6 +57,22 @@ class TimeCog():
                     session_time = delta['leave_timestamp'] - delta['join_timestamp']
                     await self.bot.send_message(self.bot.get_channel('471262806533079041'), 
                         '{} session time: {} minute(s), {} second(s)'.format(after.name, round(session_time.seconds/60), session_time.seconds % 60))
+
+    @commands.command(pass_context=True, no_pm=True)
+    async def voicetime(self, ctx):
+        time_table = bot.db['time']
+        highscores = defaultdict(list)
+
+        for entry in time_table:
+            highscores[entry['user']].append(entry['leave_timestamp'] - entry['join_timestamp'])
+            
+        for user in highscores:
+            highscores[user] = sum(highscores[user], datetime.timedelta())
+ 
+        highscores = sorted(highscores.items(), key=operator.itemgetter(1), reverse=True)
+        await self.bot.say('```{}```'.format(
+            tabulate(highscores[:10], tablefmt='plain', showindex='always')))
+
 
 
 def setup(bot):
