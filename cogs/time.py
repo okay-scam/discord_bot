@@ -59,7 +59,7 @@ class TimeCog():
                         '{} session time: {} minute(s), {} second(s)'.format(after.name, round(session_time.seconds/60), session_time.seconds % 60))
 
     @commands.command(pass_context=True, no_pm=True)
-    async def voicetime(self, ctx):
+    async def voicetime(self, ctx, member: discord.member.Member=None):
         time_table = bot.db['time']
         highscores = defaultdict(list)
 
@@ -68,11 +68,35 @@ class TimeCog():
             
         for user in highscores:
             highscores[user] = sum(highscores[user], datetime.timedelta())
- 
-        highscores = sorted(highscores.items(), key=operator.itemgetter(1), reverse=True)
-        await self.bot.say('```{}```'.format(
-            tabulate(highscores[:10], tablefmt='plain', showindex=range(1,11))))
+    
+        if member:
+            user = '{}#{}'.format(member.name, member.discriminator)
+            highscores_msg = '{} {}'.format(user, highscores[user])
+        else:
+            highscores = sorted(highscores.items(), key=operator.itemgetter(1), reverse=True)
+            highscores_msg = tabulate(highscores[:10], tablefmt='plain', showindex=range(1,11))
 
+        await self.bot.say('```{}```'.format(
+            highscores_msg))
+#           tabulate(highscores_msg, tablefmt='plain', showindex=range(1,11))))
+
+    @commands.command(pass_context=True, no_pm=True)
+    async def voicetimeall(self, ctx, member: discord.member.Member=None):
+        time_table = bot.db['time']
+        highscores = defaultdict(list)
+
+        for entry in time_table:
+            highscores[entry['user']].append(entry['leave_timestamp'] - entry['join_timestamp'])
+            
+        for user in highscores:
+            highscores[user] = sum(highscores[user], datetime.timedelta())
+    
+        highscores = sorted(highscores.items(), key=operator.itemgetter(1), reverse=True)
+        highscores_msg = tabulate(highscores, tablefmt='plain', showindex=range(1,len(highscores)+1))
+
+        await self.bot.say('```{}```'.format(
+            highscores_msg))
+#           tabulate(highscores_msg, tablefmt='plain', showindex=range(1,11))))
 
 
 def setup(bot):
