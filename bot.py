@@ -21,9 +21,10 @@ startup_extensions = [
     "cogs.mute_roulette",
     "cogs.checks",
     "cogs.voice",
-    "cogs.error_handler",
+    #"cogs.error_handler",
     #"cogs.exile",
     "cogs.votes",
+    "cogs.time",
 ]
 allowed_channels = [
     "414701519733260288", #botspam
