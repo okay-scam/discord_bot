@@ -2,7 +2,7 @@ import discord
 import asyncio
 from discord.ext import commands
 
-class TemplateCog():
+class MortCheckerCog():
     def __init__(self, bot):
         self.bot = bot
 
@@ -11,4 +11,4 @@ class TemplateCog():
         await self.bot.say('Hello {}'.format(ctx.message.author.mention))
 
 def setup(bot):
-    bot.add_cog(TemplateCog(bot))
+    bot.add_cog(MortCheckerCog(bot))

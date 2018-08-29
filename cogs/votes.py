@@ -225,6 +225,14 @@ class Votes():
         await self.update_voter_ids()
         await asyncio.sleep(1)
 
+    async def on_voice_state_update(self, before, after):
+        if after.id == '113460067017179136':
+            if (len(before.voice_channel.voice_members) > 1
+                and any(after.voice_channel is None, 
+                after.voice_channel is after.server.afk_channel))
+
+        print("Triggered")
+
 
 def setup(bot):
     bot.add_cog(Votes(bot))
