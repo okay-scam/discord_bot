@@ -2,7 +2,6 @@ import discord
 import asyncio
 import math
 import bot
-import pdb
 from pprint import pprint
 from collections import Counter
 from discord.ext import commands
@@ -38,22 +37,16 @@ class Votes():
     async def vote_start(self, ctx, vote_type):
         # Initialise initial vote statistics and vote thresholds
         self.vote_type = vote_type
-        if vote_type is not 'mort_checker':
-            self.voice_members_count = len(ctx.message.author.voice_channel.voice_members)
-            self.vote_threshold = math.ceil((self.voice_members_count * (self.vote_threshold_percentage/100))+1) # +1 to account for bots initial "votes"
-            self.server = ctx.message.server
-        else:
-            self.voice_members_count = len(ctx.voice_channel.voice_members)
-            self.vote_threshold = math.ceil((self.voice_members_count * (self.vote_threshold_percentage/100))+1) # +1 to account for bots initial "votes"
-            self.server = ctx.server         
+        self.voice_members_count = len(ctx.message.author.voice_channel.voice_members)
+        self.vote_threshold = math.ceil((self.voice_members_count * (self.vote_threshold_percentage/100))+1) # +1 to account for bots initial "votes"
+        self.server = ctx.message.server
 
         # Check if that user is in your channel
         # CAN WE REPLACE THIS WITH A @CHECK?
-        if vote_type is not 'mort_checker':
-            voice_channel_members = ctx.message.author.voice_channel.voice_members
-            if self.mentioned_user not in voice_channel_members:
-                await self.bot.say('```User must be in your voice channel to start a vote```')
-                return
+        voice_channel_members = ctx.message.author.voice_channel.voice_members
+        if self.mentioned_user not in voice_channel_members:
+            await self.bot.say('```User must be in your voice channel to start a vote```')
+            return
 
         # Then, we check if there are enough people in the channel to start a vote (min = 2)
         if self.voice_members_count < 2:
@@ -71,8 +64,6 @@ class Votes():
             vote_type_string = 'mute'
         elif self.vote_type == 'enforce_ptt':
             vote_type_string = 'enforce push-to-talk for'
-        elif self.vote_type == 'mort_checker':
-            vote_type_string == 'The bot know if Mort left without saying bye?'
         else:
             self.bot.say('```Error: Unknown vote type```')
             return
@@ -132,8 +123,6 @@ class Votes():
                     voice_act_roles = await self.get_voice_act_roles(user_permissions)
                     voice_act_role_objs = await self.get_roles(voice_act_roles)
                     await self.bot.remove_roles(self.mentioned_user, *voice_act_role_objs)
-            if self.vote_type == 'mort_checker':
-                print('+1 to mort leaving count')
         return
 
     async def get_roles(self, target_names):
@@ -235,20 +224,6 @@ class Votes():
 
         await self.update_voter_ids()
         await asyncio.sleep(1)
-
-    # MORT CHECKER
-    async def on_voice_state_update(self, before, after):
-        ctx = before
-        if after.id == '113460067017179136':
-            if (before.voice_channel is not None
-            and after.voice_channel is None
-            and before.voice_channel is not after.server.afk_channel
-            and len(before.voice_channel.voice_members) >= 0 # CHANGE TO >
-            or after.voice_channel is after.server.afk_channel
-            and before.voice_channel is not None):
-                print("Triggered")
-                self.vote_type = 'mort_checker'
-                await self.vote_start(ctx, self.vote_type)
 
 
 def setup(bot):
