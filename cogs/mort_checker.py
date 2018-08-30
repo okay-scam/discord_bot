@@ -176,7 +176,7 @@ class MortChecker():
         elif after.voice_channel is None:
             ctx = before
 
-        if after.id == '113460067017179136':
+        if after.id == '342511480685461514':
             if (before.voice_channel is not None
             and after.voice_channel is None
             and before.voice_channel is not after.server.afk_channel
