@@ -122,7 +122,8 @@ class MortChecker():
                 mort_shame_count = mort_table.find_one(name='mort')['mort_checker_count'] + 1
                 mort_table.upsert(dict(name='mort', mort_checker_count=mort_shame_count), ['name'])
                 mort_user = self.bot.get_server('299756881004462081').get_member('342511480685461514')
-                await self.bot.change_nickname(mort_user, '{} ({})'.format(mort_user.nick, mort_shame_count))
+                mort_new_user = mort_user.nick.split('(')[0].strip()
+                await self.bot.change_nickname(mort_user, '{} ({})'.format(mort_new_user, mort_shame_count))
         return
 
     # On react adds  
@@ -175,7 +176,7 @@ class MortChecker():
         elif after.voice_channel is None:
             ctx = before
 
-        if after.id == '342511480685461514':
+        if after.id == '113460067017179136':
             if (before.voice_channel is not None
             and after.voice_channel is None
             and before.voice_channel is not after.server.afk_channel
@@ -191,8 +192,8 @@ class MortChecker():
                 mort_shame_count = mort_table.find_one(name='mort')['mort_checker_count']
                 mort_table.upsert(dict(name='mort', mort_checker_count=mort_shame_count), ['name'])
                 mort_user = self.bot.get_server('299756881004462081').get_member('342511480685461514')
-                await self.bot.change_nickname(mort_user, '{} ({})'.format(mort_user.nick, mort_shame_count))
-
+                mort_new_user = mort_user.nick.split('(')[0].strip()
+                await self.bot.change_nickname(mort_user, '{} ({})'.format(mort_new_user, mort_shame_count))
 
 
 def setup(bot):
