@@ -373,7 +373,7 @@ class Music:
             and after.voice_channel is not None 
             and after.voice_channel is not after.server.afk_channel
             and after.id != '471255864238538753'
-            and len(after.voice_channel.voice_members) >= 1):
+            and len(after.voice_channel.voice_members) > 1):
 
             # Find user, if fail assign ''
             try:
