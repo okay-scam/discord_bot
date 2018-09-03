@@ -40,7 +40,7 @@ class TimeCog():
 
             time_table.insert(dict(user_id=after.id, user=user, join_timestamp=join_timestamp, leave_timestamp=join_timestamp))
             sessions_table.update(dict(user_id=after.id, session='active'), ['user_id'])
-            print('{} join_timestamp set to {}'.format(after.name, join_timestamp))
+            #print('{} join_timestamp set to {}'.format(after.name, join_timestamp))
 
 
         # User leaves voice
@@ -55,8 +55,8 @@ class TimeCog():
                     time_table.update(dict(id=row['id'], leave_timestamp=leave_timestamp), ['id'])
                     delta = time_table.find_one(id=row['id'])
                     session_time = delta['leave_timestamp'] - delta['join_timestamp']
-                    await self.bot.send_message(self.bot.get_channel('471262806533079041'), 
-                        '{} session time: {} minute(s), {} second(s)'.format(after.name, round(session_time.seconds/60), session_time.seconds % 60))
+                    #await self.bot.send_message(self.bot.get_channel('471262806533079041'), 
+                    #    '{} session time: {} minute(s), {} second(s)'.format(after.name, round(session_time.seconds/60), session_time.seconds % 60))
 
     @commands.command(pass_context=True, no_pm=True)
     async def voicetime(self, ctx, member: discord.member.Member=None):

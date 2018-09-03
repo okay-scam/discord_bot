@@ -4,6 +4,7 @@ import youtube_dl
 import requests
 import bot
 import dataset
+import random
 from tabulate import tabulate
 from boto.s3.connection import S3Connection
 from discord.ext import commands
@@ -331,7 +332,7 @@ class Music:
         # Command passed without args
         if join_sound is None:
             if db_user is None:
-                await self.bot.say('```You don\'t have a join sound, idiot.```')            
+                await self.bot.say('```You don\'t have a join sound.```')            
             else:
                 await self.bot.say('```Your current join sound is {}```'.format(db_user['join_sound']))
             return
@@ -346,17 +347,21 @@ class Music:
             return
 
         # Check the mp3 exists
-        ec2_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/'
-        mp3_url = '{}{}.mp3'.format(ec2_url, join_sound)
-        r = requests.head(mp3_url)
+        if join_sound != 'random':
+            ec2_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/'
+            mp3_url = '{}{}.mp3'.format(ec2_url, join_sound)
+            r = requests.head(mp3_url)
 
-        if not r.status_code == 200:
-            await self.bot.say('```Can\'t find *{}.mp3*```'.format(join_sound))
-            return   
+            if not r.status_code == 200:
+                await self.bot.say('```Can\'t find *{}.mp3*```'.format(join_sound))
+                return   
 
         if user_mentioned is not None:
             table.upsert(dict(user_id=user_mentioned.id, user=user, join_sound=join_sound), ['user_id'])
-            await self.bot.say('```{}\'s join sound has been set to {}```'.format(user_mentioned.name,join_sound))        
+            await self.bot.say('```{}\'s join sound has been set to {}```'.format(user_mentioned.name,join_sound))
+        elif join_sound == 'random':
+             table.upsert(dict(user_id=ctx.message.author.id, user=user, join_sound='<random>'), ['user_id'])
+             await self.bot.say('```Your join sound has been set to <{}>```'.format(join_sound))
         else:
             table.upsert(dict(user_id=ctx.message.author.id, user=user, join_sound=join_sound), ['user_id'])
             await self.bot.say('```Your join sound has been set to {}```'.format(join_sound))
@@ -368,7 +373,7 @@ class Music:
             and after.voice_channel is not None 
             and after.voice_channel is not after.server.afk_channel
             and after.id != '471255864238538753'
-            and len(after.voice_channel.voice_members) > 1):
+            and len(after.voice_channel.voice_members) >= 1):
 
             # Find user, if fail assign ''
             try:
@@ -377,10 +382,23 @@ class Music:
                 print(e)
                 return
 
-            mp3_url = ('https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/'
-            '{}.mp3'.format((db_user['join_sound'])))
+            if db_user['join_sound'] == '<random>':
+                conn = S3Connection(bot.config['AWS_ACCESS_KEY_ID'], bot.config['AWS_SECRET_ACCESS_KEY'])
+                bucket = conn.get_bucket(bot.config['AWS_STORAGE_BUCKET_NAME'])
+                sounds_list = []
+
+                for key in bucket.list():
+                    sounds_list.append(str(key.name.split('.mp3')[0]).lower())
+                mp3_url = ('https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/'
+                '{}.mp3'.format((random.choice(sounds_list))))                
+                
+            else:
+                mp3_url = ('https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/'
+                '{}.mp3'.format((db_user['join_sound'])))
             
             voice = await self.bot.join_voice_channel(after.voice_channel)
+
+            # Limit all sounds to 10s maximum
 
             try:
                 player = await voice.create_ytdl_player(mp3_url)
