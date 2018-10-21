@@ -15,7 +15,7 @@ class NewTimeCog():
         self.bot = bot
 
     @commands.command(pass_context=True)
-    async def voicetime(self, ctx):
+    async def newvoicetime(self, ctx):
         time_table = bot.db['new_time']
         highscores = dict()
         highscores_for_msg = OrderedDict()
@@ -40,7 +40,7 @@ class NewTimeCog():
         await self.bot.say('```{}```'.format(highscores_msg))
 
     @commands.command(pass_context=True)
-    async def voicetimeall(self, ctx):
+    async def newvoicetimeall(self, ctx):
         time_table = bot.db['new_time']
         highscores = dict()
         highscores_for_msg = OrderedDict()
