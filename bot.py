@@ -33,9 +33,24 @@ allowed_channels = [
 ]
 
 
+def get_user_roles():
+    users = bot.get_server('299756881004462081').members
+    user_roles_list = {}
+    for user in users:
+        user_roles_list[user.name] = [role.name for role in user.roles if (
+            role.name != '@everyone') or (role.name != '')]
+
+    return user_roles_list
+
+def update_user_roles(user_roles):
+    for user, roles in user_roles.items():
+        db['user_roles'].upsert(
+            dict(user=user, roles=','.join(roles)), ['user'])
+
 @bot.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot))
+    update_user_roles(get_user_roles())
 
 @bot.check
 def is_allowed_channel(ctx):
@@ -69,6 +84,15 @@ async def r():
         except Exception as e:
             exc = '{}: {}'.format(type(e).__name__, e)
             print('Failed to load/unload extension {}\n{}'.format(extension, exc))
+
+async def server_roles_loop():
+    await bot.wait_until_ready()
+    loop_iter = 300 # (seconds) Loop will run and increment stats on this value
+
+    while not bot.is_closed:
+        await asyncio.sleep(loop_iter)
+        update_user_roles(get_user_roles())
+
 
 async def voice_time_loop():
     await bot.wait_until_ready()
