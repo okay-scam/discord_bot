@@ -18,10 +18,6 @@ db = dataset.connect('sqlite:////home/ubuntu/discord_bot/sqlite3/discord.db')
 
 # this specifies what extensions to load when the bot starts up
 startup_extensions = [
-    #"cogs.mute",
-    #"cogs.error_handler",
-    #"cogs.exile",
-    "cogs.mute_roulette",
     "cogs.checks",
     "cogs.voice",
     "cogs.votes",
