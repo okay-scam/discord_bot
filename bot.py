@@ -2,7 +2,8 @@ import discord
 import asyncio
 import json
 import dataset
-from cogs import checks
+import requests
+from cogs import checks, voice
 from discord.ext import commands
 
 client = discord.Client()
@@ -32,17 +33,17 @@ allowed_channels = [
     "471262806533079041"  #bot
 ]
 
-
 def get_user_roles():
     users = bot.get_server('299756881004462081').members
     user_roles_list = {}
     for user in users:
-        user_roles_list[user.name] = [role.name for role in user.roles if (
-            role.name != '@everyone') or (role.name != '')]
+        user_roles_list[user.name] = [role.name for role in user.roles
+            if role.name != '']
 
     return user_roles_list
 
 def update_user_roles(user_roles):
+    db['user_roles'].drop()
     for user, roles in user_roles.items():
         db['user_roles'].upsert(
             dict(user=user, roles=','.join(roles)), ['user'])
@@ -51,6 +52,7 @@ def update_user_roles(user_roles):
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot))
     update_user_roles(get_user_roles())
+    db['sound_queue'].drop()
 
 @bot.check
 def is_allowed_channel(ctx):
@@ -85,6 +87,62 @@ async def r():
             exc = '{}: {}'.format(type(e).__name__, e)
             print('Failed to load/unload extension {}\n{}'.format(extension, exc))
 
+
+# Calls bot to join user channel
+async def summon(user):
+    return await bot.join_voice_channel(get_user_channel(user))
+
+async def play_queued_sound(user, sound):
+    ec2_url = 'https://s3-ap-southeast-2.amazonaws.com/scamdiscordbot/'
+    mp3_url = '{}{}.mp3'.format(ec2_url, sound)
+    r = requests.head(mp3_url)
+
+    # Summon to channel
+    voice = await summon(user)
+
+    if not voice:
+        return
+    try:
+        player = await voice.create_ytdl_player(mp3_url)
+        player.start()
+        while player.is_playing():
+            pass
+        await voice.disconnect()
+    except discord.ClientException as e:
+        print(e)
+        await voice.disconnect()
+
+def add_to_queue(sound, user):
+    db['sound_queue'].insert(dict(user=user, sound=sound, state='ready'))
+    return 'Added {sound} by {user} to queue'.format(sound=sound, user=user)
+
+def remove_sound_from_queue(id):
+    return db['sound_queue'].delete(id=id)
+
+async def poll_sound_queue_loop():
+    await bot.wait_until_ready()
+    loop_iter = 1 # (seconds) Loop will run and increment stats on this value
+
+    while not bot.is_closed:
+        await asyncio.sleep(loop_iter)
+
+        try:
+            sound = list(db['sound_queue'])[0]['sound']
+        except IndexError:
+            sound = None
+
+        if sound != None:
+            user = list(db['sound_queue'])[0]['user']
+            id = list(db['sound_queue'])[0]['id']
+            await play_queued_sound(user, sound)
+            remove_sound_from_queue(id)
+
+def get_user_channel(user):
+    user = discord.utils.get(
+        bot.get_server('299756881004462081').members,
+        name=user)
+    return user.voice.voice_channel
+
 async def server_roles_loop():
     await bot.wait_until_ready()
     loop_iter = 300 # (seconds) Loop will run and increment stats on this value
@@ -92,7 +150,6 @@ async def server_roles_loop():
     while not bot.is_closed:
         await asyncio.sleep(loop_iter)
         update_user_roles(get_user_roles())
-
 
 async def voice_time_loop():
     await bot.wait_until_ready()
@@ -147,4 +204,6 @@ if __name__ == "__main__":
             print('Failed to load extension {}\n{}'.format(extension, exc))
     
     bot.loop.create_task(voice_time_loop())
+    bot.loop.create_task(server_roles_loop())
+    bot.loop.create_task(poll_sound_queue_loop())
     bot.run(config['token'])
