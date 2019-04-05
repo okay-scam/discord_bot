@@ -129,7 +129,7 @@ class MortChecker():
     # On react adds  
     async def on_reaction_add(self, reaction, user):
         # Ignore to bot reacts
-        if user.id == self.bot.user.id or user.id == '342511480685461514':
+        if user.id == self.bot.user.id or user.id == '313540342429384705':
             return
             
         # Only track react adds to our vote message
