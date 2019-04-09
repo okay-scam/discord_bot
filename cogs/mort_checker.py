@@ -121,7 +121,7 @@ class MortChecker():
                 mort_table =  bot.db['mort_checker']
                 mort_shame_count = mort_table.find_one(name='mort')['mort_checker_count'] + 1
                 mort_table.upsert(dict(name='mort', mort_checker_count=mort_shame_count), ['name'])
-                mort_user = self.bot.get_server('299756881004462081').get_member('313540342429384705')
+                mort_user = self.bot.get_server('299756881004462081').get_member('163228028845948928')
                 mort_new_user = mort_user.nick.split('(')[0].strip()
                 await self.bot.change_nickname(mort_user, '{} ({})'.format(mort_new_user, mort_shame_count))
         return
@@ -129,7 +129,7 @@ class MortChecker():
     # On react adds  
     async def on_reaction_add(self, reaction, user):
         # Ignore to bot reacts
-        if user.id == self.bot.user.id or user.id == '313540342429384705':
+        if user.id == self.bot.user.id or user.id == '163228028845948928':
             return
             
         # Only track react adds to our vote message
@@ -191,9 +191,10 @@ class MortChecker():
                 mort_table =  bot.db['mort_checker']
                 mort_shame_count = mort_table.find_one(name='mort')['mort_checker_count']
                 mort_table.upsert(dict(name='mort', mort_checker_count=mort_shame_count), ['name'])
-                mort_user = self.bot.get_server('299756881004462081').get_member('313540342429384705')
+                mort_user = self.bot.get_server('299756881004462081').get_member('163228028845948928')
                 # Luke user id: 313540342429384705
                 # Mark user id: 342511480685461514
+                # Will user id: 163228028845948928
                 if '(' in mort_user.nick:
                     mort_new_user = mort_user.nick.split('(')[0].strip()
                 else:
