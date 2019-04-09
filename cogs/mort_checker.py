@@ -197,6 +197,7 @@ class MortChecker():
                 mort_shame_count = mort_table.find_one(name='mort')['mort_checker_count']
                 mort_table.upsert(dict(name='mort', mort_checker_count=mort_shame_count), ['name'])
                 mort_user = self.bot.get_server('299756881004462081').get_member(userID)
+
                 if '(' in mort_user.nick:
                     mort_new_user = mort_user.nick.split('(')[0].strip()
                 else:
