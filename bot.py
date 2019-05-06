@@ -23,11 +23,13 @@ startup_extensions = [
     "cogs.votes",
     "cogs.time",
     "cogs.mort_checker",
+    "cogs.uploads",
 ]
 allowed_channels = [
     "414701519733260288", #botspam
     "471262806533079041"  #bot
 ]
+
 
 def get_user_roles():
     users = bot.get_server('299756881004462081').members
@@ -37,6 +39,7 @@ def get_user_roles():
             if role.name != '']
 
     return user_roles_list
+
 
 def update_user_roles(user_roles):
     db['user_roles'].drop()
