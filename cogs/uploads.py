@@ -12,7 +12,6 @@ class Uploads:
         self.bot_id = "471255864238538753"
 
     async def on_message(self, message):
-        import pdb;pdb.set_trace()
         if message.channel.id != "574866821061017600":
             return
 
